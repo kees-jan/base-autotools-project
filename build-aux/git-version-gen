@@ -1,14 +1,16 @@
 #!/bin/sh
 
+PROJECT_VERSION_FILE=.project-version
+
 if SHORT=$(git describe --abbrev=0)
 then
     # It is hard to be debian compliant
     VER=$(git describe | sed -e "s/${SHORT}/$(echo ${SHORT} | tr '-' '~')/")
     echo "Git claims this is version $VER" 1>&2
-    echo $VER > .scroom-version
-elif VER=$(cat .scroom-version)
+    echo $VER > ${PROJECT_VERSION_FILE}
+elif VER=$(cat ${PROJECT_VERSION_FILE})
 then
-    echo "According to .scroom-version, this is version $VER" 1>&2
+    echo "According to ${PROJECT_VERSION_FILE}, this is version $VER" 1>&2
 else
     echo "PANIC: Can't determine Scroom version. Assuming 'Unknown'"  1>&2
     VER="Unknown"

@@ -4,7 +4,6 @@
 *~
 .deps
 .libs
-/.scroom-version
 Makefile
 Makefile.in
 /aclocal.m4
@@ -18,19 +17,6 @@ Makefile.in
 /configure
 /depcomp
 /doxyfile
-/gui/ENVIRONMENT
-/gui/src/scroom
-/libs/boost-test-helper/test/tests
-/libs/compat-tests/boost-future-test/futures-test
-/libs/sanity-tests/sanity-test
-/libs/threadpool/test/preconditions
-/libs/threadpool/test/threadpool-tests
-/libs/threadpool/test/preconditions
-/libs/memory-manager/test/memory-manager-tests
-/libs/util/test/utils-tests
-/libs/tiled-bitmap/test/tiled-bitmap-tests
-/libs/tiled-bitmap/tools/measure-framerate
-/libs/tiled-bitmap/tools/measure-load-performance
 /install-sh
 /libtool
 /ltmain.sh
