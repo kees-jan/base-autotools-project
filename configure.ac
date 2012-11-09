@@ -1,4 +1,4 @@
-# Scroom - Generic viewer for 2D data
+# Base Autotools Project - Starting point for some of my projects
 # Copyright (C) 2009-2012 Kees-Jan Dijkzeul
 # 
 # This library is free software; you can redistribute it and/or
@@ -15,18 +15,18 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 AC_PREREQ([2.64])
-AC_INIT([Scroom],
-        m4_esyscmd([build-aux/git-version-gen | tr -d '\n']),
-        [http://fuzzy.homedns.org/trac/scroom/newticket],
-        [scroom],
-        [http://fuzzy.homedns.org/trac/scroom])
+### AC_INIT([Scroom],
+###         m4_esyscmd([build-aux/git-version-gen | tr -d '\n']),
+###         [http://fuzzy.homedns.org/trac/scroom/newticket],
+###         [scroom],
+###         [http://fuzzy.homedns.org/trac/scroom])
 AM_INIT_AUTOMAKE([-Wall -Werror foreign silent-rules])
 AM_SILENT_RULES([yes])
 LT_PREREQ([2.2])
 LT_INIT([dlopen])
 
 AC_CONFIG_MACRO_DIR([m4])
-AC_CONFIG_SRCDIR([inc/scroom/presentationinterface.hh])
+### AC_CONFIG_SRCDIR([inc/scroom/presentationinterface.hh])
 AC_CONFIG_HEADERS([config.h])
 
 # Checks for programs.
@@ -70,16 +70,6 @@ AC_ARG_ENABLE([doxygen-all-code],
     [Generate doxygen documentation for all code, instead of just the api @<:@default=no@:>@])],
   [want_doxygen_all_code=${enableval}],
   [want_doxygen_all_code=no])
-AC_ARG_ENABLE([debug-tiles],
-  [AS_HELP_STRING([--enable-debug-tiles], 
-    [Display the (internally used) tiles (Debugging) @<:@default=no@:>@])],
-  [want_debug_tiles=${enableval}],
-  [want_debug_tiles=no])
-AC_ARG_ENABLE([multithreading],
-  [AS_HELP_STRING([--disable-multithreading], 
-    [Use as few threads as possible (Debugging) @<:@default=no@:>@])],
-  [want_multithreading=${enableval}],
-  [want_multithreading=yes])
 AC_ARG_ENABLE([xml-test-output],
   [AS_HELP_STRING([--enable-xml-test-output], 
     [Generate test results in XML format @<:@default=no@:>@])],
@@ -95,14 +85,6 @@ DX_PS_FEATURE(OFF)
 DX_INIT_DOXYGEN([$PACKAGE_NAME], [doxyfile], [doc])
   
 # Checks for packages.
-
-#PKG_CHECK_MODULES([HEADER, [gtk+-2.0 >= 2.0.0, libglade-2.0 glib-2.0 cairo])
-PKG_CHECK_MODULES([UTILS], [gtk+-2.0 >= 2.0.0])
-PKG_CHECK_MODULES([TILEDBITMAP], [gtk+-2.0 >= 2.0.0, cairo])
-PKG_CHECK_MODULES([EXAMPLEPLUGIN], [gtk+-2.0 >= 2.0.0])
-PKG_CHECK_MODULES([COLORMAPPLUGIN], [gtk+-2.0 >= 2.0.0, cairo])
-PKG_CHECK_MODULES([TIFFPLUGIN], [gtk+-2.0 >= 2.0.0, cairo])
-PKG_CHECK_MODULES([GUI],        [gtk+-2.0 >= 2.0.0, libglade-2.0, gthread-2.0, cairo])
 
 # Checks for libraries.
 
@@ -130,21 +112,6 @@ else
   AC_MSG_RESULT([yes])
 fi
 
-# Checking for zlib
-have_zlib_headers=no
-have_zlib=no
-AC_CHECK_HEADERS([zlib.h], [have_zlib_headers=yes])
-SCROOM_SEARCH_LIBS([zlibVersion], [z], [have_zlib=yes])
-AC_SUBST([ZLIB], [$ac_cv_search_zlibVersion])
-
-# Checking for boost thread
-have_boost_thread_headers=no
-AC_CHECK_HEADERS([boost/thread.hpp boost/thread/mutex.hpp], [have_boost_thread_headers=yes])
-have_boost_thread_lib=no
-# boost_thread-gcc42-mt is the name used at Mutracx...
-SCROOM_SEARCH_LIBS([_ZN5boost6thread6detachEv], [boost_thread-mt boost_thread-gcc42-mt], [have_boost_thread_lib=yes])
-AC_SUBST([BOOSTTHREADLIB], [$ac_cv_search__ZN5boost6thread6detachEv])
-
 #checking for boost unittests
 have_boost_test_headers=no
 AC_CHECK_HEADERS([boost/test/unit_test.hpp], [have_boost_test_headers=yes])
@@ -152,47 +119,6 @@ have_boost_test_lib=no
 SCROOM_SEARCH_LIBS([_ZN5boost9unit_test16results_reporter10set_streamERSo],
                    [boost_unit_test_framework-mt libboost_unit_test_framework-gcc42-mt], [have_boost_test_lib=yes])
 AC_SUBST([BOOSTTESTLIB], [$ac_cv_search__ZN5boost9unit_test16results_reporter10set_streamERSo])
-
-# Checking for boost futures
-have_new_boost_futures=no
-AC_CHECK_HEADERS([boost/thread/future.hpp], [have_new_boost_futures=yes], [],
-[[#ifdef HAVE_BOOST_THREAD_HPP
-# include <boost/thread.hpp>
-#endif
-]])
-have_old_boost_futures=no
-AC_CHECK_HEADERS([boost/future.hpp], [have_old_boost_futures=yes])
-
-boost_futures_include_flags=""
-if test "x${have_new_boost_futures}" = xyes
-then
-  AC_DEFINE([NEW_BOOST_FUTURES], 1, [Use futures from the Boost library release])
-else
-  if test "x${have_old_boost_futures}" = xno
-  then
-    boost_futures_include_flags="$ISYSTEM_FLAG \$(top_srcdir)/compat/boost-futures/inc"
-  fi
-fi
-AC_SUBST([BOOST_FUTURES_CPPFLAGS], [$boost_futures_include_flags])
-AM_CONDITIONAL([NEW_BOOST_FUTURES], [test x$have_new_boost_futures = xyes])
-
-# Some sanity checks
-if test "x${have_zlib_headers}" = xno
-then
-  AC_MSG_ERROR([zLib headers not found])
-fi
-if test "x${have_zlib}" = xno
-then
-  AC_MSG_ERROR([zLib library not found])
-fi
-if test "x${have_boost_thread_headers}" = xno
-then
-  AC_MSG_ERROR([Boost thread header files not found.])
-fi
-if test "x${have_boost_thread_lib}" = xno
-then
-  AC_MSG_ERROR([Boost thread library not found.])
-fi
 
 want_boost_tests=no
 if test x$have_boost_test_headers = xyes -a x$have_boost_test_lib = xyes
@@ -230,76 +156,22 @@ then
   AC_DEFINE([MUTRACX_HACKS], 1, [Hacks for Mutracx environment enabled])
 fi
 
-if test "x${want_doxygen_all_code}" = xyes
-then
-  DX_EXTRA_SRC="\$(top_srcdir)/gui \$(top_srcdir)/libs \$(top_srcdir)/plugins"
-else
-  DX_EXTRA_SRC=
-fi
-AC_SUBST(DX_EXTRA_SRC)
+### if test "x${want_doxygen_all_code}" = xyes
+### then
+###   DX_EXTRA_SRC="\$(top_srcdir)/gui \$(top_srcdir)/libs \$(top_srcdir)/plugins"
+### else
+###   DX_EXTRA_SRC=
+### fi
+### AC_SUBST(DX_EXTRA_SRC)
 
-if test "x${want_debug_tiles}" = xyes
-then
-  AC_DEFINE([DEBUG_TILES], 1, [Visualize internally used tiles])
-fi
-if test "x${want_multithreading}" = xyes
-then
-  AC_DEFINE([MULTITHREADING], 1, [Use as many threads as needed])
-fi
 if test "x${want_xml_test_output}" = xyes
 then
   AC_DEFINE([XML_TEST_OUTPUT], 1, [Have all Boost unittests report in xml format])
 fi
 
-# GetText
-dnl GETTEXT_PACKAGE=scroom
-dnl AC_SUBST(GETTEXT_PACKAGE)
-dnl AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE,"$GETTEXT_PACKAGE", [Gettext package.])
-dnl 
-dnl dnl Add the languages which your application supports here.
-dnl ALL_LINGUAS=""
-dnl AM_GLIB_GNU_GETTEXT
-
-
 AC_CONFIG_FILES([Makefile
-                 compat/Makefile
-                 compat/boost-futures/Makefile
-                 compat/boost-futures/inc/Makefile
-                 compat/boost-futures/doc/Makefile
-                 inc/Makefile
-                 libs/Makefile
-                 libs/boost-test-helper/Makefile
-                 libs/boost-test-helper/src/Makefile
-                 libs/boost-test-helper/test/Makefile
-                 libs/compat-tests/Makefile
-                 libs/compat-tests/boost-future-test/Makefile
-                 libs/sanity-tests/Makefile
-                 libs/util/Makefile
-                 libs/util/src/Makefile
-                 libs/util/test/Makefile
-                 libs/threadpool/Makefile
-                 libs/threadpool/src/Makefile
-                 libs/threadpool/test/Makefile
-                 libs/memory-manager/Makefile
-                 libs/memory-manager/src/Makefile
-                 libs/memory-manager/test/Makefile
-                 libs/tiled-bitmap/Makefile
-                 libs/tiled-bitmap/src/Makefile
-                 libs/tiled-bitmap/test/Makefile
-                 libs/tiled-bitmap/tools/Makefile
-                 plugins/Makefile
-                 plugins/colormap/Makefile
-                 plugins/example/Makefile
-                 plugins/tiff/Makefile
-                 plugins/tiff/src/Makefile
-                 gui/Makefile
-                 gui/ENVIRONMENT
-                 gui/src/Makefile
                  doxyfile
 ])
-
-# Misc defines
-AC_SUBST([plugindir], [$libdir/$PACKAGE])
 
 AC_OUTPUT
 
